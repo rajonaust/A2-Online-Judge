@@ -1,0 +1,160 @@
+/*
+    Author : RAJON BARDHAN
+    AUST CSE 27th Batch
+    All my programming success are dedicated to my mom , dad , little sister madhobi , teachers , friends and love TANIA SULTANA RIMY
+
+    Problem Name : 366. Prime Palindrome ( A2 Online Judge )
+    ALGORITHM : Number Theory
+*/
+
+#include <bits/stdc++.h>
+using namespace std;
+
+#define pb push_back
+#define ff first
+#define ss second
+#define mp make_pair
+#define memo(a,b) memset(a,b,sizeof(a))
+#define INF 1e9
+#define EPS 1e-8
+#define PI 3.14159265358979323846
+
+typedef long long ll ;
+typedef unsigned long long ull ;
+
+/* int dx[] = {1,-1,0,0} , dy[] = {0,0,1,-1}; */ // 4 Direction
+/* int dx[] = {1,-1,0,0,1,1,-1,-1} , dy[] = {0,0,1,-1,1,-1,1,-1}; */ // 8 Direction
+/* int dx[] = {1,-1,1,-1,2,2,-2,-2} , dy[] = {2,2,-2,-2,1,-1,1,-1}; */ // Knight Direction
+/* int dx[] = {2,-2,1,1,-1,-1} , dy[] = {0,0,1,-1,1,-1}; */ // Hexagonal Direction
+
+char arr[25],brr[25];
+
+/* Calculate ( a*b ) %c */
+ll mulmod(ll a,ll b,ll c)
+{
+    ll x = 0 , y = a%c ;
+    while(b>0)
+    {
+        if(b%2) x = (x+y)%c ;
+        y=(y*2)%c;
+        b/=2;
+    }
+    return x%c ;
+}
+
+/* Calculate ( a^b ) %c */
+ll modulo(ll a,ll b,ll c)
+{
+    ll x = 1 , y = a%c ;
+    while( b > 0 )
+    {
+        if(b%2) x = mulmod(x,y,c) ;
+        y=mulmod(y,y,c);
+        b/=2;
+    }
+    return x%c ;
+}
+
+bool miller_rabin(ll p, ll iteration)
+{
+    if(p<2) return false ;
+    if(p%2==0&&p!=2) return false ;
+
+    ll s = p-1 ;
+    while(s%2==0) s/=2;
+
+    for(ll i=1;i<=iteration;i++)
+    {
+        ll a = rand() % (p-1)+1 , temp = s ;
+
+        ll mod = modulo(a,temp,p);
+        while(mod!=1&&mod!=p-1&&temp!=p-1)
+        {
+            mod = mulmod(mod,mod,p);
+            temp*=2;
+        }
+        if(temp%2==0&&mod!=p-1) return false ;
+    }
+    return true ;
+}
+
+bool palin ( ll N )
+{
+    ll k = 0 , t = N ;
+    while( t!=0 )
+    {
+        k = k*10 + t%10 ;
+        t/=10;
+    }
+    return N == k ;
+}
+
+ll next_palindrome( ll N )
+{
+    memo(arr,NULL);
+    memo(brr,NULL);
+
+    ll t = N , sz = 0 , res = 0 ;
+    while( t!=0 )
+    {
+        arr[sz++] = t%10+'0' ;
+        t/=10;
+    }
+    reverse(arr,arr+sz);
+    strcpy(brr,arr);
+
+    int lo = 0 , hi = strlen(arr)-1 ;
+
+    while( lo <= hi ) arr[hi--] = arr[lo++] ;
+
+    if(strcmp(arr,brr)<=0)
+    {
+        lo-- ; hi++ ;
+        int carry = 1 ;
+
+        while(carry!=0&&lo>-1)
+        {
+            int t=arr[lo]+carry;
+            if(t>'9') t = '0' ; else carry = 0 ;
+            arr[lo--] = arr[hi++] = t ;
+        }
+
+        if(carry==1)
+        {
+            for(int i=hi;i>=1;i--) arr[i] = arr[i-1] ;
+            arr[0] = arr[hi] = '1' ;
+        }
+    }
+
+    for(int i=0;i<strlen(arr);i++) res = res*10 + arr[i] - '0' ;
+
+    return res ;
+}
+
+int main()
+{
+    //freopen("input.txt","r",stdin);
+    //freopen("output.txt","w",stdout);
+    ll N ;
+    while( cin >> N )
+    {
+        if(palin(N))
+        {
+            if(miller_rabin(N,50))
+            {
+                printf("%lld\n",N);
+                continue ;
+            }
+        }
+        while( true )
+        {
+            N = next_palindrome( N );
+            if(miller_rabin(N,50))
+            {
+                printf("%lld\n",N);
+                break ;
+            }
+        }
+    }
+    return 0;
+}
